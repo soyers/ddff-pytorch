@@ -65,11 +65,13 @@ class DDFFNet(nn.Module):
 
     def weights_init(self, m):
         classname = m.__class__.__name__
-        #if classname.find('Conv') != -1:
-        #    m.weight.data.normal_(0.0, 0.02)
-        #elif classname.find('BatchNorm') != -1:
-        if classname.find('BatchNorm') != -1:
+        if classname.find('Conv') != -1:
+            nn.init.kaiming_normal(m.weight, a=0, mode='fan_in')
+            m.bias.data.fill_(0)
+        elif classname.find('BatchNorm') != -1:
             m.weight.data.normal_(0, 1.0)
+            m.running_var.data.normal_(0, 1.0)
+            m.running_mean.data.fill_(0)
             m.bias.data.fill_(0)
 
     def __map_state_dict(self, vgg16_features_dict, bias):
