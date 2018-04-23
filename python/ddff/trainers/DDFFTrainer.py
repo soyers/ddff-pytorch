@@ -18,13 +18,13 @@ class DDFFTrainer(BaseTrainer):
                         cc4_enabled=False, 
                         cc5_enabled=False, 
                         pretrained='no_bn', 
-                        sequential_weight_sharing=False, 
                         scheduler_step_size=4, 
                         scheduler_gama=0.9, 
                         deterministic=False, 
-                        optimizer='sgd'):
+                        optimizer='sgd',
+                        normalize_loss=False):
         #Define model
-        net = DDFFNet.DDFFNet(stack_size, cc1_enabled=cc1_enabled, cc2_enabled=cc2_enabled, cc3_enabled=cc3_enabled, cc4_enabled=cc4_enabled, cc5_enabled=cc5_enabled, sequential_weight_sharing=sequential_weight_sharing, pretrained=pretrained)
+        net = DDFFNet.DDFFNet(stack_size, cc1_enabled=cc1_enabled, cc2_enabled=cc2_enabled, cc3_enabled=cc3_enabled, cc4_enabled=cc4_enabled, cc5_enabled=cc5_enabled, pretrained=pretrained)
         #Define optimizer
         if optimizer == 'sgd':
             opt = self.create_optimizer(net, {"algorithm":'sgd', "learning_rate":learning_rate,  "weight_decay": 0.0005, "momentum":0.9})
@@ -33,7 +33,7 @@ class DDFFTrainer(BaseTrainer):
         #Define scheduler
         scheduler = optim.lr_scheduler.StepLR(opt, step_size=scheduler_step_size, gamma=scheduler_gama)
         #Define training loss
-        training_loss = self.MaskedLoss(nn.MSELoss(), valid_cond=lambda x : x >= cliprange[0])
+        training_loss = self.MaskedLoss(nn.MSELoss(size_average=normalize_loss), valid_cond=lambda x : x >= cliprange[0])
 
         #Call parent constructor
         super(DDFFTrainer, self).__init__(net, opt, training_loss, deterministic, scheduler=scheduler)
@@ -51,11 +51,11 @@ class DDFFTrainer(BaseTrainer):
                         pretrained='no_bn', 
                         normalize_mean=[0.485, 0.456, 0.406], 
                         normalize_std=[0.229, 0.224, 0.225],
-                        sequential_weight_sharing=False, 
                         scheduler_step_size=4, 
                         scheduler_gama=0.9, 
                         deterministic=False, 
                         optimizer='sgd', 
+                        normalize_loss=False,
                         epochs=20, 
                         batch_size=2, 
                         num_workers=4, 
@@ -78,11 +78,11 @@ class DDFFTrainer(BaseTrainer):
                         cc4_enabled=cc4_enabled, 
                         cc5_enabled=cc5_enabled, 
                         pretrained=pretrained, 
-                        sequential_weight_sharing=sequential_weight_sharing, 
                         scheduler_step_size=scheduler_step_size, 
                         scheduler_gama=scheduler_gama, 
                         deterministic=deterministic, 
-                        optimizer=optimizer)
+                        optimizer=optimizer,
+                        normalize_loss=normalize_loss)
 
         #Save instance variables
         instance.dataloader_validation = dataloader_validation
@@ -100,9 +100,9 @@ class DDFFTrainer(BaseTrainer):
                         cc3_enabled=True, 
                         cc4_enabled=False, 
                         cc5_enabled=False, 
-                        sequential_weight_sharing=False, 
                         deterministic=False, 
-                        optimizer='sgd'):
+                        optimizer='sgd',
+                        normalize_loss=False):
         #Call constructor
         instance = cls(stack_size,
                         cc1_enabled=cc1_enabled, 
@@ -110,9 +110,9 @@ class DDFFTrainer(BaseTrainer):
                         cc3_enabled=cc3_enabled, 
                         cc4_enabled=cc4_enabled, 
                         cc5_enabled=cc5_enabled, 
-                        sequential_weight_sharing=sequential_weight_sharing, 
                         deterministic=deterministic, 
-                        optimizer=optimizer)
+                        optimizer=optimizer,
+                        normalize_loss=normalize_loss)
 
         #Load checkpoint
         instance.load_checkpoint(checkpoint_file)
@@ -126,7 +126,6 @@ class DDFFTrainer(BaseTrainer):
                         cc3_enabled=True, 
                         cc4_enabled=False, 
                         cc5_enabled=False, 
-                        sequential_weight_sharing=False, 
                         deterministic=False, 
                         optimizer='sgd'):
         #Call constructor
@@ -136,7 +135,6 @@ class DDFFTrainer(BaseTrainer):
                         cc3_enabled=cc3_enabled, 
                         cc4_enabled=cc4_enabled, 
                         cc5_enabled=cc5_enabled, 
-                        sequential_weight_sharing=sequential_weight_sharing, 
                         deterministic=deterministic, 
                         optimizer=optimizer,
                         pretrained=None)
@@ -157,10 +155,12 @@ class DDFFTrainer(BaseTrainer):
         #Same logic was also implemented in https://github.com/ruotianluo/pytorch-mobilenet-from-tf/blob/master/convert.py
         pretrained_dict = {k:(v.transpose((3, 2, 0, 1)) if (k.startswith("conv") or k.startswith("upconv")) and v.ndim == 4 else v) for k, v in pretrained_dict.items()}
         pretrained_dict = {("scoring" + k[len("conv_disp"):] if k.startswith("conv_disp") else "autoencoder." + k):v for k, v in pretrained_dict.items()}
-        #Convert weight arrays to tirch tensors
+        #Convert weight arrays to torch tensors
         pretrained_dict = {k:torch.from_numpy(v).float() for k, v in pretrained_dict.items()}
         #Load weights
-        self.model.load_state_dict(pretrained_dict)
+        model_state_dict = self.model.state_dict()
+        model_state_dict.update(pretrained_dict)
+        self.model.load_state_dict(model_state_dict)
 
     def __translate_tflearn_key(self, key):
         if key.endswith("/W:0"):
@@ -182,7 +182,8 @@ class DDFFTrainer(BaseTrainer):
             transform += [FocalStackDDFFH5Reader.FocalStackDDFFH5Reader.ClipGroundTruth(cliprange[0], cliprange[1])]
         if crop_size is not None:
             transform += [FocalStackDDFFH5Reader.FocalStackDDFFH5Reader.RandomCrop(crop_size)]
-        transform += [FocalStackDDFFH5Reader.FocalStackDDFFH5Reader.Normalize(mean_input=mean, std_input=std)]
+        if mean is not None and std is not None:
+            transform += [FocalStackDDFFH5Reader.FocalStackDDFFH5Reader.Normalize(mean_input=mean, std_input=std)]
         transform = torchvision.transforms.Compose(transform)
         return transform
 
@@ -199,5 +200,5 @@ class DDFFTrainer(BaseTrainer):
             self.valid_cond = valid_cond
 
         def forward(self, inputs, outputs):
-            mask = self.valid_cond(outputs)#(outputs != self.invalid_value)
+            mask = self.valid_cond(outputs)
             return self.loss(inputs[mask], outputs[mask])

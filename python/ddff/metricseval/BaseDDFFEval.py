@@ -1,24 +1,21 @@
 import numpy as np
 import torch
 import skimage.filters as skf
-import cv2
 
 class BaseDDFFEval:
     def __init__(self, trainer):
         self.trainer = trainer
 
-    def evaluate(self, dataloader, accthrs = [1.25, 1.25**2, 1.25**3]):
+    def evaluate(self, dataloader, accthrs = [1.25, 1.25**2, 1.25**3], image_size=(383,552)):
         avgmetrics = np.zeros((1, 7+len(accthrs)), dtype=float)
-        count = 0
         for i, data in enumerate(dataloader):
             inputs, output = data["input"], data["output"]
             if torch.cuda.is_available():
                     inputs = inputs.cuda()
             output_approx = self.trainer.evaluate(inputs)
-            metrics = self.__calmetrics(output_approx.permute(0,2,3,1).squeeze().data.cpu().numpy(), output.permute(0,2,3,1).squeeze().numpy(), 1.0, accthrs, bumpinessclip=0.05, ignore_zero=True)
-            count += 1
+            metrics = self.__calmetrics(output_approx.permute(0,2,3,1).squeeze().data.cpu().numpy()[:image_size[0],:image_size[1]], output.permute(0,2,3,1).squeeze().numpy()[:image_size[0],:image_size[1]], 1.0, accthrs, bumpinessclip=0.05, ignore_zero=True)
             avgmetrics += metrics
-        return avgmetrics/count
+        return avgmetrics/len(dataloader)
 
     # Metrics calculation provided by Caner Hazirbas
     def __calmetrics(self, pred, target, mse_factor, accthrs, bumpinessclip=0.05, ignore_zero=True):

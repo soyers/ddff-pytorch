@@ -6,9 +6,8 @@ import torch
 import numpy as np
 
 class DDFFNet(nn.Module):
-    def __init__(self, focal_stack_size, output_dims=1, cc1_enabled=False, cc2_enabled=False, cc3_enabled=True, cc4_enabled=False, cc5_enabled=False, bias=False, sequential_weight_sharing=False, pretrained='no_bn'):
+    def __init__(self, focal_stack_size, output_dims=1, cc1_enabled=False, cc2_enabled=False, cc3_enabled=True, cc4_enabled=False, cc5_enabled=False, bias=False, pretrained='no_bn'):
         super(DDFFNet, self).__init__()
-        self.sequential_weight_sharing = sequential_weight_sharing
         self.autoencoder = DDFFAutoEncoder(output_dims, cc1_enabled, cc2_enabled, cc3_enabled, cc4_enabled, cc5_enabled, bias=bias)
         #Update pretrained weights
         if pretrained == 'no_bn':
@@ -48,17 +47,11 @@ class DDFFNet(nn.Module):
         self.apply(self.weights_init)
 
     def forward(self, images):
-        if self.sequential_weight_sharing:
-            #Swap focal stack axis to the beginning
-            images_swapped = images.transpose(0,1)
-            #Extract features from images
-            image_features = torch.cat([self.autoencoder(focal_image) for focal_image in images_swapped],1)
-        else:
-            #Encode stacks in batch dimension and calculate features
-            image_features = self.autoencoder(images.view(-1, *images.shape[2:]))
-            #Encode stacks in feature dimension again
-            image_features = image_features.view(images.shape[0], -1, *image_features.shape[2:])
-
+        #Encode stacks in batch dimension and calculate features
+        image_features = self.autoencoder(images.view(-1, *images.shape[2:]))
+        #Encode stacks in feature dimension again
+        image_features = image_features.view(images.shape[0], -1, *image_features.shape[2:])
+        #Score extracted features
         result = self.scoring(image_features)
 
         return result
@@ -67,11 +60,12 @@ class DDFFNet(nn.Module):
         classname = m.__class__.__name__
         if classname.find('Conv') != -1:
             nn.init.kaiming_normal(m.weight, a=0, mode='fan_in')
-            m.bias.data.fill_(0)
+            if m.bias is not None:
+                m.bias.data.fill_(0)
         elif classname.find('BatchNorm') != -1:
             m.weight.data.normal_(0, 1.0)
-            m.running_var.data.normal_(0, 1.0)
-            m.running_mean.data.fill_(0)
+            m.running_var.normal_(0, 1.0)
+            m.running_mean.fill_(0)
             m.bias.data.fill_(0)
 
     def __map_state_dict(self, vgg16_features_dict, bias):
@@ -200,100 +194,94 @@ class DDFFAutoEncoder(nn.Module):
 
         #Encoder
         self.conv1_1 = nn.Conv2d(3, 64, 3, padding=1, bias=bias)
-        self.conv1_1_bn = nn.BatchNorm2d(64)
+        self.conv1_1_bn = nn.BatchNorm2d(64, eps=0.001)
         self.conv1_2 = nn.Conv2d(64, 64, 3, padding=1, bias=bias)
-        self.conv1_2_bn = nn.BatchNorm2d(64)
+        self.conv1_2_bn = nn.BatchNorm2d(64, eps=0.001)
         self.pool1 = nn.MaxPool2d(2, stride=2)
         self.conv2_1 = nn.Conv2d(64, 128, 3, padding=1, bias=bias)
-        self.conv2_1_bn = nn.BatchNorm2d(128)
+        self.conv2_1_bn = nn.BatchNorm2d(128, eps=0.001)
         self.conv2_2 = nn.Conv2d(128, 128 , 3, padding=1, bias=bias)
-        self.conv2_2_bn = nn.BatchNorm2d(128)
+        self.conv2_2_bn = nn.BatchNorm2d(128, eps=0.001)
         self.pool2 = nn.MaxPool2d(2, stride=2)
         self.conv3_1 = nn.Conv2d(128, 256, 3, padding=1, bias=bias)
-        self.conv3_1_bn = nn.BatchNorm2d(256)
+        self.conv3_1_bn = nn.BatchNorm2d(256, eps=0.001)
         self.conv3_2 = nn.Conv2d(256, 256, 3, padding=1, bias=bias)
-        self.conv3_2_bn = nn.BatchNorm2d(256)
+        self.conv3_2_bn = nn.BatchNorm2d(256, eps=0.001)
         self.conv3_3 = nn.Conv2d(256, 256, 3, padding=1, bias=bias)
-        self.conv3_3_bn = nn.BatchNorm2d(256)
+        self.conv3_3_bn = nn.BatchNorm2d(256, eps=0.001)
         self.pool3 = nn.MaxPool2d(2, stride=2)
         self.encdrop3 = nn.Dropout(p=0.5)
         self.conv4_1 = nn.Conv2d(256, 512, 3, padding=1, bias=bias)
-        self.conv4_1_bn = nn.BatchNorm2d(512)
+        self.conv4_1_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv4_2 = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv4_2_bn = nn.BatchNorm2d(512)
+        self.conv4_2_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv4_3 = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv4_3_bn = nn.BatchNorm2d(512)
+        self.conv4_3_bn = nn.BatchNorm2d(512, eps=0.001)
         self.pool4 = nn.MaxPool2d(2, stride=2)
         self.encdrop4 = nn.Dropout(p=0.5)
         self.conv5_1 = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv5_1_bn = nn.BatchNorm2d(512)
+        self.conv5_1_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv5_2 = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv5_2_bn = nn.BatchNorm2d(512)
+        self.conv5_2_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv5_3 = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv5_3_bn = nn.BatchNorm2d(512)
+        self.conv5_3_bn = nn.BatchNorm2d(512, eps=0.001)
         self.pool5 = nn.MaxPool2d(2, stride=2)
         self.encdrop5 = nn.Dropout(p=0.5)
 
         #Decoder
-        #self.decoder_maxpool1 = nn.Upsample(scale_factor=2, mode='nearest')
         self.upconv5 = nn.ConvTranspose2d(512, 512, 4, padding=1, stride=2, bias=False)
         if self.cc5_enabled:
             self.conv5_3_D = nn.Conv2d(1024, 512, 3, padding=1, bias=bias)
         else:
             self.conv5_3_D = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv5_3_D_bn = nn.BatchNorm2d(512)
+        self.conv5_3_D_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv5_2_D = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv5_2_D_bn = nn.BatchNorm2d(512)
+        self.conv5_2_D_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv5_1_D = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv5_1_D_bn = nn.BatchNorm2d(512)
+        self.conv5_1_D_bn = nn.BatchNorm2d(512, eps=0.001)
         self.decdrop5 = nn.Dropout(p=0.5)
 
         self.upconv4 = nn.ConvTranspose2d(512, 512, 4, padding=1, stride=2, bias=False)
-        #self.decoder_maxpool2 = nn.Upsample(scale_factor=2, mode='nearest')
-        #self.maxpool2 = nn.MaxUnpool2d(2, stride=2)
         if self.cc4_enabled:
             self.conv4_3_D = nn.Conv2d(1024, 512, 3, padding=1, bias=bias)
         else:
             self.conv4_3_D = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv4_3_D_bn = nn.BatchNorm2d(512)
+        self.conv4_3_D_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv4_2_D = nn.Conv2d(512, 512, 3, padding=1, bias=bias)
-        self.conv4_2_D_bn = nn.BatchNorm2d(512)
+        self.conv4_2_D_bn = nn.BatchNorm2d(512, eps=0.001)
         self.conv4_1_D = nn.Conv2d(512, 256, 3, padding=1, bias=bias)
-        self.conv4_1_D_bn = nn.BatchNorm2d(256)
+        self.conv4_1_D_bn = nn.BatchNorm2d(256, eps=0.001)
         self.decdrop4 = nn.Dropout(p=0.5)
 
         self.upconv3 = nn.ConvTranspose2d(256, 256, 4, padding=1, stride=2, bias=False)
-        #self.decoder_maxpool3 = nn.Upsample(scale_factor=2, mode='nearest')
         if self.cc3_enabled:
             self.conv3_3_D = nn.Conv2d(512, 256, 3, padding=1, bias=bias)
         else:
             self.conv3_3_D = nn.Conv2d(256, 256, 3, padding=1, bias=bias)
-        self.conv3_3_D_bn = nn.BatchNorm2d(256)
+        self.conv3_3_D_bn = nn.BatchNorm2d(256, eps=0.001)
         self.conv3_2_D = nn.Conv2d(256, 256, 3, padding=1, bias=bias)
-        self.conv3_2_D_bn = nn.BatchNorm2d(256)
+        self.conv3_2_D_bn = nn.BatchNorm2d(256, eps=0.001)
         self.conv3_1_D = nn.Conv2d(256, 128, 3, padding=1, bias=bias)
-        self.conv3_1_D_bn = nn.BatchNorm2d(128)
+        self.conv3_1_D_bn = nn.BatchNorm2d(128, eps=0.001)
         self.decdrop3 = nn.Dropout(p=0.5)
 
         self.upconv2 = nn.ConvTranspose2d(128, 128, 4, padding=1, stride=2, bias=False)
-        #self.decoder_maxpool4 = nn.Upsample(scale_factor=2, mode='nearest')
         if self.cc2_enabled:
             self.conv2_2_D = nn.Conv2d(256, 128, 3, padding=1, bias=bias)
         else:
             self.conv2_2_D = nn.Conv2d(128, 128, 3, padding=1, bias=bias)
-        self.conv2_2_D_bn = nn.BatchNorm2d(128)
+        self.conv2_2_D_bn = nn.BatchNorm2d(128, eps=0.001)
         self.conv2_1_D = nn.Conv2d(128, 64, 3, padding=1, bias=bias)
-        self.conv2_1_D_bn = nn.BatchNorm2d(64)
+        self.conv2_1_D_bn = nn.BatchNorm2d(64, eps=0.001)
 
         self.upconv1 = nn.ConvTranspose2d(64, 64, 4, padding=1, stride=2, bias=False)
-        #self.decoder_maxpool5 = nn.Upsample(scale_factor=2, mode='nearest')
         if self.cc1_enabled:
             self.conv1_2_D = nn.Conv2d(128, 64, 3, padding=1, bias=bias)
         else:
             self.conv1_2_D = nn.Conv2d(64, 64, 3, padding=1, bias=bias)
-        self.conv1_2_D_bn = nn.BatchNorm2d(64)
+        self.conv1_2_D_bn = nn.BatchNorm2d(64, eps=0.001)
         self.conv1_1_D = nn.Conv2d(64, self.output_dims, 3, padding=1, bias=bias)
-        self.conv1_1_D_bn = nn.BatchNorm2d(self.output_dims)
+        self.conv1_1_D_bn = nn.BatchNorm2d(self.output_dims, eps=0.001)
 
     def forward(self, x):
         #Encoder
@@ -320,42 +308,35 @@ class DDFFAutoEncoder(nn.Module):
         x = self.encdrop5(x)
 
         #Decoder
-        #x = self.decoder_maxpool1(x)
         x = nn.functional.relu(self.upconv5(x))
         if self.cc5_enabled:
-            x = torch.cat([cc5, x], 1)
+            x = torch.cat([x, cc5], 1)
         x = nn.functional.relu(self.conv5_3_D_bn(self.conv5_3_D(x)))
         x = nn.functional.relu(self.conv5_2_D_bn(self.conv5_2_D(x)))
         x = nn.functional.relu(self.conv5_1_D_bn(self.conv5_1_D(x)))
         x = self.decdrop5(x)
         x = nn.functional.relu(self.upconv4(x))
-        #x = self.decoder_maxpool2(x)
         if self.cc4_enabled:
-            x = torch.cat([cc4, x], 1)
+            x = torch.cat([x, cc4], 1)
         x = nn.functional.relu(self.conv4_3_D_bn(self.conv4_3_D(x)))
         x = nn.functional.relu(self.conv4_2_D_bn(self.conv4_2_D(x)))
         x = nn.functional.relu(self.conv4_1_D_bn(self.conv4_1_D(x)))
         x = self.decdrop4(x)
         x = nn.functional.relu(self.upconv3(x))
-        #x = self.decoder_maxpool3(x)
         if self.cc3_enabled:
-            x = torch.cat([cc3, x], 1)
+            x = torch.cat([x, cc3], 1)
         x = nn.functional.relu(self.conv3_3_D_bn(self.conv3_3_D(x)))
         x = nn.functional.relu(self.conv3_2_D_bn(self.conv3_2_D(x)))
         x = nn.functional.relu(self.conv3_1_D_bn(self.conv3_1_D(x)))
         x = self.decdrop3(x)
         x = nn.functional.relu(self.upconv2(x))
-        #x = self.decoder_maxpool4(x)
         if self.cc2_enabled:
-            x = torch.cat([cc2, x], 1)
+            x = torch.cat([x, cc2], 1)
         x = nn.functional.relu(self.conv2_2_D_bn(self.conv2_2_D(x)))
         x = nn.functional.relu(self.conv2_1_D_bn(self.conv2_1_D(x)))
         x = nn.functional.relu(self.upconv1(x))
-        #x = self.decoder_maxpool5(x)
         if self.cc1_enabled:
-            x = torch.cat([cc1, x], 1)
+            x = torch.cat([x, cc1], 1)
         x = nn.functional.relu(self.conv1_2_D_bn(self.conv1_2_D(x)))
         x = nn.functional.relu(self.conv1_1_D_bn(self.conv1_1_D(x)))
-
-        #x = self.features(x)
         return x

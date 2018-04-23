@@ -29,7 +29,7 @@ class FocalStackDDFFH5Reader(Dataset):
 
     def __getitem__(self, idx):
         #Create sample dict
-        sample = {'input': self.hdf5[self.stack_key][idx].astype(float)/255.0, 'output': self.hdf5[self.disp_key][idx]}
+        sample = {'input': self.hdf5[self.stack_key][idx].astype(float), 'output': self.hdf5[self.disp_key][idx]}
 
         #Transform sample with data augmentation transformers
         if self.transform:
@@ -48,7 +48,7 @@ class FocalStackDDFFH5Reader(Dataset):
             # swap color axis because
             # numpy image: H x W x C
             # torch image: C X H X W
-            sample['input'] = torch.stack([torch.from_numpy(sample_image.transpose((2,0,1))).float() for sample_image in sample['input']])
+            sample['input'] = torch.from_numpy(sample['input'].transpose((0,3,1,2))).float()
             sample['output'] = torch.from_numpy(sample['output']).float()
             return sample
 

@@ -11,7 +11,7 @@ class DDFFEval(BaseDDFFEval):
         super(DDFFEval, self).__init__(self.trainer)
 
     def evaluate(self, filename_testset, stack_key="stack_test", disp_key="disp_test", image_size=(383,552)):
-        #Calculate pat size for images
+        #Calculate pad size for images
         test_pad_size = (np.ceil((image_size[0] / 32)) * 32, np.ceil((image_size[1] / 32)) * 32) #32=2**numPoolings(=5)
         #Create test set transforms
         transform_test = [FocalStackDDFFH5Reader.FocalStackDDFFH5Reader.ToTensor(), 
