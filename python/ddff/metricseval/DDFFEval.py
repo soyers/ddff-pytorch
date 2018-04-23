@@ -23,5 +23,5 @@ class DDFFEval(BaseDDFFEval):
         transform_test = torchvision.transforms.Compose(transform_test)
         #Create dataloader
         datareader = FocalStackDDFFH5Reader.FocalStackDDFFH5Reader(filename_testset, transform=transform_test, stack_key=stack_key, disp_key=disp_key)
-        dataloader = DataLoader(datareader, batch_size=1, shuffle=True, num_workers=0)
+        dataloader = DataLoader(datareader, batch_size=1, shuffle=False, num_workers=0)
         return super(DDFFEval, self).evaluate(dataloader)
