@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import ddff.dataproviders.datareaders.FocalStackDDFFH5Reader as FocalStackDDFFH5Reader
 import ddff.metricseval.DDFFEval as DDFFEval
 

@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import numpy as np
 import ddff.dataproviders.datareaders.FocalStackDDFFH5Reader as FocalStackDDFFH5Reader
 import ddff.trainers.DDFFTrainer as DDFFTrainer

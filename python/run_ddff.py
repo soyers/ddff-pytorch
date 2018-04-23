@@ -1,16 +1,36 @@
+#! /usr/bin/python3
+
+import argparse
 import torch
 import random
 import numpy as np
 import ddff.trainers.DDFFTrainer as DDFFTrainer
 
 if __name__ == "__main__":
+    #Add command line parser arguments
+    parser = argparse.ArgumentParser(description='Train ddff net on specified h5 dataset.')
+    parser.add_argument('--dataset', default="/usr/data/soyers/Original_Dataset/dataset-trainval.h5", help='h5 file that contains the training and validation data (default: /usr/data/soyers/Original_Dataset/dataset-trainval.h5)')
+    parser.add_argument('--epochs', default=200, type=int, help='number of training epochs (default: 200)')
+    parser.add_argument('--checkpoint', default="ddff_cc3_checkpoint.pt", help='Checkpoint file to be created during training (default: ddff_cc3_checkpoint.pt)')
+    parser.add_argument('--batchsize', default=2, type=int, help='batch size during training (default: 2)')
+    parser.add_argument('--pretrained', default="bn", help='Either specify a npy file to load tensorflow weights or use "bn" or "no_bn" to use pretrained weights from torchvision package (default: bn)')
 
-    root_dir_h5 = "/usr/data/soyers/Original_Dataset/dataset-trainval.h5"
-    epochs = 200
-    split_ratio = 0.8
-
-    #Uncomment to finetune pretrained vgg16 net from torchvision package
-    #ddff_trainer = DDFFTrainer.DDFFTrainer.from_h5_data(root_dir_h5, learning_rate=0.001, cc1_enabled=False, cc2_enabled=False, cc3_enabled=True, cc4_enabled=False, cc5_enabled=False, training_crop_size=None, validation_crop_size=None, pretrained='no_bn', epochs=epochs, checkpoint_file="ddff_checkpoint_cc3_orig_data_refac.pt")
+    #Parse arguments
+    args = parser.parse_args()
  
     #Finetune tensorflow vgg16 model
-    ddff_trainer = DDFFTrainer.DDFFTrainer.from_h5_data(root_dir_h5, learning_rate=0.001, cc1_enabled=False, cc2_enabled=False, cc3_enabled=True, cc4_enabled=False, cc5_enabled=False, training_crop_size=None, validation_crop_size=None, pretrained='/usr/data/soyers/vgg16.npy', normalize_mean=None, normalize_std=None, epochs=epochs, checkpoint_file="ddff_cc3_no_preprocessing_checkpoint.pt", batch_size=2, deterministic=True)
+    ddff_trainer = DDFFTrainer.DDFFTrainer.from_h5_data(args.dataset, 
+                    learning_rate=0.001, 
+                    cc1_enabled=False, 
+                    cc2_enabled=False, 
+                    cc3_enabled=True, 
+                    cc4_enabled=False, 
+                    cc5_enabled=False, 
+                    training_crop_size=None, 
+                    validation_crop_size=None, 
+                    pretrained=args.pretrained, 
+                    normalize_mean=None, normalize_std=None, 
+                    epochs=args.epochs, 
+                    checkpoint_file=args.checkpoint, 
+                    batch_size=args.batchsize, 
+                    deterministic=True)
