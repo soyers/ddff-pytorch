@@ -4,8 +4,8 @@ import ddff.metricseval.DDFFTFLearnEval as DDFFTFLearnEval
 if __name__ == "__main__":
     #Set parameters
     image_size = (383,552)
-    filename_testset = "dataset-trainval.h5"
-    checkpoint_file = "snapshot-121256.npz"
+    filename_testset = "ddff-dataset-trainval.h5"
+    checkpoint_file = "ddffnet-cc3-snapshot-121256.npz"
 
     #Create validation reader
     tmp_datareader = FocalStackDDFFH5Reader.FocalStackDDFFH5Reader(filename_testset, transform=None, stack_key="stack_val", disp_key="disp_val")

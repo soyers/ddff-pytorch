@@ -6,7 +6,7 @@ import ddff.metricseval.DDFFEval as DDFFEval
 if __name__ == "__main__":
     #Set parameters
     image_size = (383,552)
-    filename_testset = "dataset-trainval.h5"
+    filename_testset = "ddff-dataset-trainval.h5"
     checkpoint_file = "ddff_cc3_checkpoint.pt"
 
     #Create validation reader

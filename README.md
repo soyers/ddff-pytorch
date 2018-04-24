@@ -17,7 +17,7 @@ ince the original implementation of Deep Depth From Focus was created in TensorF
 
 The pretrained weights exported from the TensorFlow/TFLearn model and converted to a PyTorch compatible dict is available [here](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddffnet-cc3-snapshot-121256.npz)(159.3MB).
 
-The training process can be started by running [run_ddff.py](python/run_ddff.py) which can be provided with a training dataset passing the parameter ```--dataset```
+The training process can be started by running [run_ddff.py](python/run_ddff.py) which can be provided with a training dataset passing the parameter ```--dataset```. To evaulate the results the generated checkpoint file can be loaded as shown in [eval_ddff.py](python/eval_ddff.py) which calculates the error metrics on a test dataset.
 
 #### Initiazation
 To train the network on the dataset introduced in the Deep Depth From Focus paper [run_ddff.py](python/run_ddff.py) has to be run with respective arguments specifying where the dataset is located and other hyper parameters that can be inspected by passing the argument ```-h```.
