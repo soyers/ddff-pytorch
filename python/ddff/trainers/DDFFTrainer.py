@@ -53,6 +53,7 @@ class DDFFTrainer(BaseTrainer):
                         normalize_std=[0.229, 0.224, 0.225],
                         scheduler_step_size=4, 
                         scheduler_gama=0.9, 
+                        max_gradient=5.0,
                         deterministic=False, 
                         optimizer='sgd', 
                         normalize_loss=False,
@@ -88,7 +89,7 @@ class DDFFTrainer(BaseTrainer):
         instance.dataloader_validation = dataloader_validation
 
         #Fit instance
-        epoch_losses = instance.train(dataloader_train, epochs, checkpoint_file=checkpoint_file, checkpoint_frequency=checkpoint_frequency)
+        epoch_losses = instance.train(dataloader_train, epochs, checkpoint_file=checkpoint_file, checkpoint_frequency=checkpoint_frequency, max_gradient=max_gradient)
         print("Losses per epoch: " + str(epoch_losses))
 
         return instance

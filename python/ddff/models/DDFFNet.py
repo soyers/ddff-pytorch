@@ -9,6 +9,9 @@ class DDFFNet(nn.Module):
     def __init__(self, focal_stack_size, output_dims=1, cc1_enabled=False, cc2_enabled=False, cc3_enabled=True, cc4_enabled=False, cc5_enabled=False, bias=False, pretrained='no_bn'):
         super(DDFFNet, self).__init__()
         self.autoencoder = DDFFAutoEncoder(output_dims, cc1_enabled, cc2_enabled, cc3_enabled, cc4_enabled, cc5_enabled, bias=bias)
+        self.scoring = nn.Conv2d(focal_stack_size*output_dims, output_dims, 1, bias=False)
+        #Init weights
+        self.apply(self.weights_init)
         #Update pretrained weights
         if pretrained == 'no_bn':
             autoencoder_state_dict = self.autoencoder.state_dict()
@@ -39,12 +42,7 @@ class DDFFNet(nn.Module):
             #Update model dict
             autoencoder_state_dict.update(pretrained_dict)
             #Load updated state dict
-            self.autoencoder.load_state_dict(autoencoder_state_dict)            
-            
-        self.scoring = nn.Conv2d(focal_stack_size*output_dims, output_dims, 1, bias=False)
-
-        #Init weights
-        self.apply(self.weights_init)
+            self.autoencoder.load_state_dict(autoencoder_state_dict)
 
     def forward(self, images):
         #Encode stacks in batch dimension and calculate features

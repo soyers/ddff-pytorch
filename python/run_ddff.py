@@ -20,7 +20,8 @@ if __name__ == "__main__":
  
     #Finetune tensorflow vgg16 model
     ddff_trainer = DDFFTrainer.DDFFTrainer.from_h5_data(args.dataset, 
-                    learning_rate=0.001, 
+                    learning_rate=0.001,
+                    max_gradient=5.0, 
                     cc1_enabled=False, 
                     cc2_enabled=False, 
                     cc3_enabled=True, 
