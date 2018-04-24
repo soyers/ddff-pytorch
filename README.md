@@ -1,5 +1,5 @@
 # Deep Depth From Focus
-Deep Depth from Focus implementation in PyTorch
+[Deep Depth from Focus](http://hazirbas.com/projects/ddff/) implementation in PyTorch. Please check the [ddff-toolbox](https://github.com/hazirbas/ddff-toolbox) for refocusing and camera parameters.
 
 ## Usage
 ### Installation
@@ -24,7 +24,7 @@ The focal stacks in the hdf5 file have to be of shape [stacksize, height, width,
 
 The disparity maps have to be of shape [1, height, width] containing the disparity in pixels. The dataset introduced in the Deep Depth From Focus paper contains disparities in the range [0.0202, 0.2825]
 
-Please download the [trainval](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddff-dataset-trainval.h5)(12.6GB) and [test](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddff-dataset-test.h5)(761.1MB) hdf5 datasets. Focal stacks can be read as:
+Please download the [trainval](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddff-dataset-trainval.h5) (12.6GB) and [test](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddff-dataset-test.h5) (761.1MB) hdf5 datasets. Focal stacks can be read as:
 ~~~~
 import h5py
 
@@ -34,6 +34,8 @@ disparities = dataset["disp_train"]
 ~~~~
 
 Please submit your results to the [Competition](https://competitions.codalab.org/competitions/17807) to evaluate on the test set.
+
+**Note that** test scores are a bit worse than the results presented on the paper due to the framework switch.
 
 ## Citation
 If you use this code or the publicly shared model, please cite the following paper.
