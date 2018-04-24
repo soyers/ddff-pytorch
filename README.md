@@ -13,7 +13,11 @@ This implementation contains the [Deep Depth from Focus model](python/ddff/model
 
 In order to evaluate the model, an [evaluation class](python/ddff/metricseval/DDFFEval.py) is provided. It takes a model checkpoint and a path to the test data (h5 file) and features a method to calculate the errors described in the Deep Depth From Focus paper.
 
-Since the original implementation of Deep Depth From Focus was created in TensorFlow with TFLearn, the class [DDFFTFLearnEval](python/ddff/metricseval/DDFFTFLearnEval.py) loads the checkpoint exported from the original model in order to perform the error evlauation. [python/eval_ddff_tflearn.py](eval_ddff_tflearn.py) shows an example of how to use the class.
+ince the original implementation of Deep Depth From Focus was created in TensorFlow and TFLearn the class [DDFFTFLearnEval](python/ddff/metricseval/DDFFTFLearnEval.py) loads the checkpoint exported from the original model in order to perform the error evlauation. [eval_ddff_tflearn.py](python/eval_ddff_tflearn.py) shows an example of how to use the class.
+
+The pretrained weights exported from the TensorFlow/TFLearn model and converted to a PyTorch compatible dict is available [here](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddffnet-cc3-snapshot-121256.npz)(159.3MB).
+
+The training process can be started by running [run_ddff.py](python/run_ddff.py) which can be provided with a training dataset passing the parameter ```--dataset```
 
 #### Initiazation
 To train the network on the dataset introduced in the Deep Depth From Focus paper [run_ddff.py](python/run_ddff.py) has to be run with respective arguments specifying where the dataset is located and other hyper parameters that can be inspected by passing the argument ```-h```.
