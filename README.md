@@ -9,11 +9,11 @@ conda env create -f condaenv.ym
 ```
 
 ### Training and Testing
-The project contains a the [Deep Depth from Focus model](python/ddff/models/DDFFNet.py) and a class to run the [training and prediction](python/ddff/trainers/DDFFTrainer.py) on a provided dataset. Furthermore a [datareader](python/ddff/dataproviders/datareaders/FocalStackDDFFH5Reader.py) class is provided that reads hdf5 files containing focal stacks and corresponding disparity maps.
+This implementation contains the [Deep Depth from Focus model](python/ddff/models/DDFFNet.py) and a class to run the [training and prediction](python/ddff/trainers/DDFFTrainer.py) on a provided dataset. Furthermore a [datareader](python/ddff/dataproviders/datareaders/FocalStackDDFFH5Reader.py) class is provided to read hdf5 files containing focal stacks and their corresponding disparity maps.
 
 In order to evaluate the model, an [evaluation class](python/ddff/metricseval/DDFFEval.py) is provided. It takes a model checkpoint and a path to the test data (h5 file) and features a method to calculate the errors described in the Deep Depth From Focus paper.
 
-Since the original implementation of Deep Depth From Focus was created in TensorFlow and TFLearn the class [DDFFTFLearnEval](python/ddff/metricseval/DDFFTFLearnEval.py) loads the checkpoint exported from the original model in order to perform the error evlauation. [python/eval_ddff_tflearn.py](eval_ddff_tflearn.py) shows an example of how to use the class.
+Since the original implementation of Deep Depth From Focus was created in TensorFlow with TFLearn, the class [DDFFTFLearnEval](python/ddff/metricseval/DDFFTFLearnEval.py) loads the checkpoint exported from the original model in order to perform the error evlauation. [python/eval_ddff_tflearn.py](eval_ddff_tflearn.py) shows an example of how to use the class.
 
 #### Initiazation
 To train the network on the dataset introduced in the Deep Depth From Focus paper [run_ddff.py](python/run_ddff.py) has to be run with respective arguments specifying where the dataset is located and other hyper parameters that can be inspected by passing the argument ```-h```.
