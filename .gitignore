@@ -105,3 +105,7 @@ ENV/
 
 #Datasets
 *.h5
+
+#Weights
+*.npz
+*.npy

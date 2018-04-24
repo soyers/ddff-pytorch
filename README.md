@@ -39,7 +39,7 @@ disparities = dataset["disp_train"]
 
 Please submit your results to the [Competition](https://competitions.codalab.org/competitions/17807) to evaluate on the test set.
 
-**Note that** test scores are a bit worse than the results presented on the paper due to the framework switch.
+**Note that** test scores are a slightly worse by a margin of 0.0001 (MSE) than the results presented on the paper due to the framework switch.
 
 ## Citation
 If you use this code or the publicly shared model, please cite the following paper.
