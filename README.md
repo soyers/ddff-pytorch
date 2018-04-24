@@ -24,6 +24,17 @@ The focal stacks in the hdf5 file have to be of shape [stacksize, height, width,
 
 The disparity maps have to be of shape [1, height, width] containing the disparity in pixels. The dataset introduced in the Deep Depth From Focus paper contains disparities in the range [0.0202, 0.2825]
 
+Please download the [trainval](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddff-dataset-trainval.h5)(12.6GB) and [test](https://vision.in.tum.de/webarchive/hazirbas/ddff12scene/ddff-dataset-test.h5)(761.1MB) hdf5 datasets. Focal stacks can be read as:
+~~~~
+import h5py
+
+dataset = h5py.File("ddff-dataset-trainval.h5", "r")
+focal_stacks = dataset["stacks_train"]
+disparities = dataset["disp_train"]
+~~~~
+
+Please submit your results to the [Competition](https://competitions.codalab.org/competitions/17807) to evaluate on the test set.
+
 ## Citation
 If you use this code or the publicly shared model, please cite the following paper.
 
