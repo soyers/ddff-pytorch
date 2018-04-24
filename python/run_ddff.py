@@ -9,7 +9,7 @@ import ddff.trainers.DDFFTrainer as DDFFTrainer
 if __name__ == "__main__":
     #Add command line parser arguments
     parser = argparse.ArgumentParser(description='Train ddff net on specified h5 dataset.')
-    parser.add_argument('--dataset', default="/usr/data/soyers/Original_Dataset/dataset-trainval.h5", help='h5 file that contains the training and validation data (default: /usr/data/soyers/Original_Dataset/dataset-trainval.h5)')
+    parser.add_argument('--dataset', default="dataset-trainval.h5", help='h5 file that contains the training and validation data (default: dataset-trainval.h5)')
     parser.add_argument('--epochs', default=200, type=int, help='number of training epochs (default: 200)')
     parser.add_argument('--checkpoint', default="ddff_cc3_checkpoint.pt", help='Checkpoint file to be created during training (default: ddff_cc3_checkpoint.pt)')
     parser.add_argument('--batchsize', default=2, type=int, help='batch size during training (default: 2)')
