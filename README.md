@@ -17,7 +17,7 @@ Since the original implementation of Deep Depth From Focus was created in Tensor
 
 #### Initiazation
 To train the network on the dataset introduced in the Deep Depth From Focus paper [run_ddff.py](python/run_ddff.py) has to be run with respective arguments specifying where the dataset is located and other hyper parameters that can be inspected by passing the argument ```-h```.
-The [datareader](python/ddff/dataproviders/datareaders/FocalStackDDFFH5Reader.py) class requires the provided h5 file to contain a key for the focal stacks (default: "stack_test") and a key for the corresponding disparity maps (default: "disp_test") that can be passed during initialization of the reader.
+The [datareader](python/ddff/dataproviders/datareaders/FocalStackDDFFH5Reader.py) class requires the provided h5 file to contain a key for the focal stacks (default: "stack_train") and a key for the corresponding disparity maps (default: "disp_train") that can be passed during initialization of the reader.
 
 #### Data preparation
 The focal stacks in the hdf5 file have to be of shape [stacksize, height, width, channels] containing values in the range [0,255].

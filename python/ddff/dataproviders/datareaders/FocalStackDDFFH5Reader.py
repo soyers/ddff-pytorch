@@ -9,7 +9,7 @@ import h5py
 
 class FocalStackDDFFH5Reader(Dataset):
 
-    def __init__(self, hdf5_filename, transform=None, stack_key="stack_test", disp_key="disp_test"):
+    def __init__(self, hdf5_filename, transform=None, stack_key="stack_train", disp_key="disp_train"):
         """
         Args:
             root_dir_fs (string): Directory with all focal stacks of all image datasets.

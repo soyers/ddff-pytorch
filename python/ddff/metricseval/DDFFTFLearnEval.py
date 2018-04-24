@@ -14,7 +14,7 @@ class DDFFTFLearnEval(BaseDDFFEval):
         self.norm_std = norm_std
         super(DDFFTFLearnEval, self).__init__(trainer)
 
-    def evaluate(self, filename_testset, stack_key="stack_test", disp_key="disp_test", image_size=(383,552)):
+    def evaluate(self, filename_testset, stack_key="stack_val", disp_key="disp_val", image_size=(383,552)):
         #Calculate pad size for images
         test_pad_size = (np.ceil((image_size[0] / 32)) * 32, np.ceil((image_size[1] / 32)) * 32) #32=2**numPoolings(=5)
         #Create test set transforms

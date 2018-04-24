@@ -102,3 +102,6 @@ ENV/
 
 #Pytorch checkpoints
 *.pt
+
+#Datasets
+*.h5
