@@ -46,14 +46,14 @@ If you use this code or the publicly shared model, please cite the following pap
 
 Caner Hazirbas, Laura Leal-Taixé  and Daniel Cremers, _"Deep Depth From Focus"_, ArXiv, 2017. ([arXiv](https://arxiv.org/abs/1704.01085))
 
-    @inproceedings{ddff17arxiv,
-     author    = {C. Hazirbas and L. Leal-Taixé and D. Cremers},
+    @inproceedings{hazirbas18ddff,
+     author    = {C. Hazirbas and and S. Soyer and M. Staab and L. Leal-Taixé and D. Cremers},
      title     = {Deep Depth From Focus},
-     booktitle = {ArXiv},
-     year      = {2017},
-     month     = {April},
-     eprint = {1704.01085},
-     url = {https://github.com/hazirbas/ddff-toolbox},
+     booktitle = {Asian Conference on Computer Vision (ACCV)},
+     year      = {2018},
+     month     = {December},
+     eprint    = {1704.01085},
+     url       = {https://hazirbas.com/projects/ddff/},
     }
 
 ## License
