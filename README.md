@@ -47,7 +47,7 @@ If you use this code or the publicly shared model, please cite the following pap
 Caner Hazirbas, Sebastian Soyer, Maximilian Staab, Laura Leal-Taixé  and Daniel Cremers, _"Deep Depth From Focus"_, ACCV, 2018. ([arXiv](https://arxiv.org/abs/1704.01085))
 
     @inproceedings{hazirbas18ddff,
-     author    = {C. Hazirbas and and S. Soyer and M. Staab and L. Leal-Taixé and D. Cremers},
+     author    = {C. Hazirbas and and S. G. Soyer and M. Staab and L. Leal-Taixé and D. Cremers},
      title     = {Deep Depth From Focus},
      booktitle = {Asian Conference on Computer Vision (ACCV)},
      year      = {2018},
