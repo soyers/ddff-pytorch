@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
+import os
 import torch
-from torch.autograd import Variable
 from torch import optim
 
 class BaseTrainer:
@@ -17,25 +17,28 @@ class BaseTrainer:
         self.scheduler = scheduler
         self.supervised = supervised
 
+        if not os.path.exists('checkpoints'):
+            os.makedirs('checkpoints')
+
     def create_optimizer(self, net, optimizer_params):
         if optimizer_params["algorithm"] == 'sgd':
            return optim.SGD(
-                filter(lambda p: p.requires_grad, net.parameters()), 
-                lr=optimizer_params["learning_rate"] if "learning_rate" in optimizer_params else 0.001, 
-                momentum=optimizer_params["momentum"] if "momentum" in optimizer_params else 0.9, 
+                filter(lambda p: p.requires_grad, net.parameters()),
+                lr=optimizer_params["learning_rate"] if "learning_rate" in optimizer_params else 0.001,
+                momentum=optimizer_params["momentum"] if "momentum" in optimizer_params else 0.9,
                 weight_decay=optimizer_params["weight_decay"] if "weight_decay" in optimizer_params else 0.0005)
         elif optimizer_params["algorithm"] == 'adam':
             return optim.Adam(
-                filter(lambda p: p.requires_grad, net.parameters()), 
-                lr=optimizer_params["learning_rate"] if "learning_rate" in optimizer_params else 0.001, 
+                filter(lambda p: p.requires_grad, net.parameters()),
+                lr=optimizer_params["learning_rate"] if "learning_rate" in optimizer_params else 0.001,
                 weight_decay=optimizer_params["weight_decay"] if "weight_decay" in optimizer_params else 0.0005)
         else:
             return optim.SGD(
-                filter(lambda p: p.requires_grad, net.parameters()), 
-                lr=0.001, 
-                momentum=0.9, 
+                filter(lambda p: p.requires_grad, net.parameters()),
+                lr=0.001,
+                momentum=0.9,
                 weight_decay=0.0005)
-        
+
 
     def __set_deterministic(self):
         import random
@@ -75,11 +78,6 @@ class BaseTrainer:
                         inputs = [element.cuda() for element in inputs]
                     else:
                         inputs = inputs.cuda()
-                #Wrap inputs in Variable
-                if isinstance(inputs, list):
-                    inputs = [Variable(element) for element in inputs]
-                else:
-                    inputs = Variable(inputs)
 
                 #Forward
                 if isinstance(inputs, list):
@@ -96,14 +94,10 @@ class BaseTrainer:
                             outputs = [element.cuda() for element in outputs]
                         else:
                             outputs = outputs.cuda()
-                    #Wrap outputs in Variable
+
                     if isinstance(outputs, list):
-                        outputs = [Variable(element) for element in outputs]
-                        #Calculate loss
                         loss = self.training_loss(*output_approx, *outputs)
                     else:
-                        outputs = Variable(outputs)
-                        #Calculate loss
                         loss = self.training_loss(output_approx, outputs)
                 else:
                     #Calculate loss
@@ -114,27 +108,27 @@ class BaseTrainer:
 
                 #Backward
                 loss.backward()
-                
+
                 #Clip gradients
                 if max_gradient is not None:
-                    torch.nn.utils.clip_grad_norm(self.model.parameters(), max_gradient, norm_type=2)
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_gradient, norm_type=2)
 
                 #Optimize
                 self.optimizer.step()
 
                 #Store epoch loss
-                epoch_loss += loss.data[0]
+                epoch_loss += loss.item()
 
                 #Print statistics
-                running_loss += loss.data[0]
-                if i % print_frequency == print_frequency-1:    # print every print_frequency mini-batches   
+                running_loss += loss.item()
+                if i % print_frequency == print_frequency-1:    # print every print_frequency mini-batches
                     print('[%d, %5d] loss: ' %
                       (epoch + 1, i + 1) + str(running_loss / print_frequency))
                     running_loss = 0.0
 
-                #Save checkpoint
-                if checkpoint_file is not None and i % checkpoint_frequency == checkpoint_frequency-1:  
-                    self.save_checkpoint(checkpoint_file, epoch=(epoch+1), save_optimizer=True)
+            #Save checkpoint
+            if checkpoint_file is not None and epoch % checkpoint_frequency == checkpoint_frequency-1:
+                self.save_checkpoint(checkpoint_file, epoch=(epoch+1), save_optimizer=True)
 
             #Save loss of epoch
             epoch_losses += [epoch_loss/len(dataloader)]
@@ -143,7 +137,7 @@ class BaseTrainer:
             if self.scheduler is not None:
                 self.scheduler.step()
         #Save final checkpoint
-        if checkpoint_file is not None:  
+        if checkpoint_file is not None:
             self.save_checkpoint(checkpoint_file, epoch=epochs, save_optimizer=True)
         print("Training finished")
         return epoch_losses
@@ -151,7 +145,7 @@ class BaseTrainer:
     def evaluate(self, inputs):
         #Set model to eval mode in order to disable dropout
         self.model.eval()
-        inputs = Variable(inputs, volatile=True)
+        inputs.requires_grad = False
         return self.model(inputs)
 
 
@@ -161,7 +155,7 @@ class BaseTrainer:
             state['optimizer'] = self.optimizer.state_dict()
         if epoch is not None:
             state['epoch'] = epoch
-        torch.save(state, filename)
+        torch.save(state, 'checkpoints/'+filename)
 
     def load_checkpoint(self, filename, load_optimizer=True, load_scheduler=True):
         #Load model to cpu

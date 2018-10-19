@@ -3,9 +3,9 @@
 
 ## Usage
 ### Installation
-To run the project a Python 3.5 environment and a number of packages are required. The easiest way to fetch all dependencies is to install [Anaconda](https://conda.io/) and load the [environment](condaenv.yml) provided in this repository:
+To run the project a Python 3.7.0 environment and a number of packages are required. The easiest way to fetch all dependencies is to install via pip.
 ```
-conda env create -f condaenv.yml
+pip install -r requirements.txt
 ```
 
 ### Training and Testing

@@ -12,15 +12,15 @@ from ddff.trainers.BaseTrainer import BaseTrainer
 
 class DDFFTrainer(BaseTrainer):
     def __init__(self, stack_size, learning_rate=0.001, cliprange=[0.0202, 0.2825],
-                        cc1_enabled=False, 
-                        cc2_enabled=False, 
-                        cc3_enabled=True, 
-                        cc4_enabled=False, 
-                        cc5_enabled=False, 
-                        pretrained='no_bn', 
-                        scheduler_step_size=4, 
-                        scheduler_gama=0.9, 
-                        deterministic=False, 
+                        cc1_enabled=False,
+                        cc2_enabled=False,
+                        cc3_enabled=True,
+                        cc4_enabled=False,
+                        cc5_enabled=False,
+                        pretrained='no_bn',
+                        scheduler_step_size=4,
+                        scheduler_gama=0.9,
+                        deterministic=False,
                         optimizer='sgd',
                         normalize_loss=False):
         #Define model
@@ -33,34 +33,34 @@ class DDFFTrainer(BaseTrainer):
         #Define scheduler
         scheduler = optim.lr_scheduler.StepLR(opt, step_size=scheduler_step_size, gamma=scheduler_gama)
         #Define training loss
-        training_loss = self.MaskedLoss(nn.MSELoss(size_average=normalize_loss), valid_cond=lambda x : x >= cliprange[0])
+        training_loss = self.MaskedLoss(nn.MSELoss(reduction="elementwise_mean" if normalize_loss else "sum"), valid_cond=lambda x : x >= cliprange[0])
 
         #Call parent constructor
         super(DDFFTrainer, self).__init__(net, opt, training_loss, deterministic, scheduler=scheduler)
 
     @classmethod
     def from_h5_data(cls,root_dir,
-                        learning_rate=0.001, 
-                        cc1_enabled=False, 
-                        cc2_enabled=False, 
-                        cc3_enabled=True, 
-                        cc4_enabled=False, 
-                        cc5_enabled=False, 
-                        training_crop_size=None, 
-                        validation_crop_size=None, 
-                        pretrained='no_bn', 
-                        normalize_mean=[0.485, 0.456, 0.406], 
+                        learning_rate=0.001,
+                        cc1_enabled=False,
+                        cc2_enabled=False,
+                        cc3_enabled=True,
+                        cc4_enabled=False,
+                        cc5_enabled=False,
+                        training_crop_size=None,
+                        validation_crop_size=None,
+                        pretrained='no_bn',
+                        normalize_mean=[0.485, 0.456, 0.406],
                         normalize_std=[0.229, 0.224, 0.225],
-                        scheduler_step_size=4, 
-                        scheduler_gama=0.9, 
+                        scheduler_step_size=4,
+                        scheduler_gama=0.9,
                         max_gradient=5.0,
-                        deterministic=False, 
-                        optimizer='sgd', 
+                        deterministic=False,
+                        optimizer='sgd',
                         normalize_loss=False,
-                        epochs=20, 
-                        batch_size=2, 
-                        num_workers=4, 
-                        checkpoint_file=None, 
+                        epochs=20,
+                        batch_size=2,
+                        num_workers=4,
+                        checkpoint_file=None,
                         checkpoint_frequency=50):
         #Create data loaders
         transform_train = cls.__create_preprocessing(cls, crop_size=training_crop_size, mean=normalize_mean, std=normalize_std)
@@ -72,20 +72,20 @@ class DDFFTrainer(BaseTrainer):
         dataloader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers)
         dataloader_validation = DataLoader(dataset_validation, batch_size=1, shuffle=True, num_workers=0)
         #Call constructor
-        instance = cls(dataset_train.get_stack_size(), learning_rate=learning_rate, 
-                        cc1_enabled=cc1_enabled, 
-                        cc2_enabled=cc2_enabled, 
-                        cc3_enabled=cc3_enabled, 
-                        cc4_enabled=cc4_enabled, 
-                        cc5_enabled=cc5_enabled, 
-                        pretrained=pretrained, 
-                        scheduler_step_size=scheduler_step_size, 
-                        scheduler_gama=scheduler_gama, 
-                        deterministic=deterministic, 
+        instance = cls(dataset_train.get_stack_size(), learning_rate=learning_rate,
+                        cc1_enabled=cc1_enabled,
+                        cc2_enabled=cc2_enabled,
+                        cc3_enabled=cc3_enabled,
+                        cc4_enabled=cc4_enabled,
+                        cc5_enabled=cc5_enabled,
+                        pretrained=pretrained,
+                        scheduler_step_size=scheduler_step_size,
+                        scheduler_gama=scheduler_gama,
+                        deterministic=deterministic,
                         optimizer=optimizer,
                         normalize_loss=normalize_loss)
 
-        #Save instance variables
+        #Save instances
         instance.dataloader_validation = dataloader_validation
 
         #Fit instance
@@ -96,22 +96,22 @@ class DDFFTrainer(BaseTrainer):
 
     @classmethod
     def from_checkpoint(cls, checkpoint_file, stack_size,
-                        cc1_enabled=False, 
-                        cc2_enabled=False, 
-                        cc3_enabled=True, 
-                        cc4_enabled=False, 
-                        cc5_enabled=False, 
-                        deterministic=False, 
+                        cc1_enabled=False,
+                        cc2_enabled=False,
+                        cc3_enabled=True,
+                        cc4_enabled=False,
+                        cc5_enabled=False,
+                        deterministic=False,
                         optimizer='sgd',
                         normalize_loss=False):
         #Call constructor
         instance = cls(stack_size,
-                        cc1_enabled=cc1_enabled, 
-                        cc2_enabled=cc2_enabled, 
-                        cc3_enabled=cc3_enabled, 
-                        cc4_enabled=cc4_enabled, 
-                        cc5_enabled=cc5_enabled, 
-                        deterministic=deterministic, 
+                        cc1_enabled=cc1_enabled,
+                        cc2_enabled=cc2_enabled,
+                        cc3_enabled=cc3_enabled,
+                        cc4_enabled=cc4_enabled,
+                        cc5_enabled=cc5_enabled,
+                        deterministic=deterministic,
                         optimizer=optimizer,
                         normalize_loss=normalize_loss)
 
@@ -122,21 +122,21 @@ class DDFFTrainer(BaseTrainer):
 
     @classmethod
     def from_tflearn(cls, checkpoint_file, stack_size,
-                        cc1_enabled=False, 
-                        cc2_enabled=False, 
-                        cc3_enabled=True, 
-                        cc4_enabled=False, 
-                        cc5_enabled=False, 
-                        deterministic=False, 
+                        cc1_enabled=False,
+                        cc2_enabled=False,
+                        cc3_enabled=True,
+                        cc4_enabled=False,
+                        cc5_enabled=False,
+                        deterministic=False,
                         optimizer='sgd'):
         #Call constructor
         instance = cls(stack_size,
-                        cc1_enabled=cc1_enabled, 
-                        cc2_enabled=cc2_enabled, 
-                        cc3_enabled=cc3_enabled, 
-                        cc4_enabled=cc4_enabled, 
-                        cc5_enabled=cc5_enabled, 
-                        deterministic=deterministic, 
+                        cc1_enabled=cc1_enabled,
+                        cc2_enabled=cc2_enabled,
+                        cc3_enabled=cc3_enabled,
+                        cc4_enabled=cc4_enabled,
+                        cc5_enabled=cc5_enabled,
+                        deterministic=deterministic,
                         optimizer=optimizer,
                         pretrained=None)
 
