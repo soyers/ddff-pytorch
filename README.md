@@ -1,5 +1,5 @@
 # Deep Depth From Focus
-[Deep Depth from Focus](http://hazirbas.com/projects/ddff/) implementation in PyTorch. Please check the [ddff-toolbox](https://github.com/hazirbas/ddff-toolbox) for refocusing and camera parameters.
+[Deep Depth From Focus](http://hazirbas.com/projects/ddff/) implementation in PyTorch. Please check the [ddff-toolbox](https://github.com/hazirbas/ddff-toolbox) for refocusing and camera parameters.
 
 ## Usage
 ### Installation
