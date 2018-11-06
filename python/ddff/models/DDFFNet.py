@@ -306,33 +306,33 @@ class DDFFAutoEncoder(nn.Module):
         x = self.encdrop5(x)
 
         #Decoder
-        x = nn.functional.relu(self.upconv5(x))
+        x = self.upconv5(x)
         if self.cc5_enabled:
             x = torch.cat([x, cc5], 1)
         x = nn.functional.relu(self.conv5_3_D_bn(self.conv5_3_D(x)))
         x = nn.functional.relu(self.conv5_2_D_bn(self.conv5_2_D(x)))
         x = nn.functional.relu(self.conv5_1_D_bn(self.conv5_1_D(x)))
         x = self.decdrop5(x)
-        x = nn.functional.relu(self.upconv4(x))
+        x = self.upconv4(x)
         if self.cc4_enabled:
             x = torch.cat([x, cc4], 1)
         x = nn.functional.relu(self.conv4_3_D_bn(self.conv4_3_D(x)))
         x = nn.functional.relu(self.conv4_2_D_bn(self.conv4_2_D(x)))
         x = nn.functional.relu(self.conv4_1_D_bn(self.conv4_1_D(x)))
         x = self.decdrop4(x)
-        x = nn.functional.relu(self.upconv3(x))
+        x = self.upconv3(x)
         if self.cc3_enabled:
             x = torch.cat([x, cc3], 1)
         x = nn.functional.relu(self.conv3_3_D_bn(self.conv3_3_D(x)))
         x = nn.functional.relu(self.conv3_2_D_bn(self.conv3_2_D(x)))
         x = nn.functional.relu(self.conv3_1_D_bn(self.conv3_1_D(x)))
         x = self.decdrop3(x)
-        x = nn.functional.relu(self.upconv2(x))
+        x = self.upconv2(x)
         if self.cc2_enabled:
             x = torch.cat([x, cc2], 1)
         x = nn.functional.relu(self.conv2_2_D_bn(self.conv2_2_D(x)))
         x = nn.functional.relu(self.conv2_1_D_bn(self.conv2_1_D(x)))
-        x = nn.functional.relu(self.upconv1(x))
+        x = self.upconv1(x)
         if self.cc1_enabled:
             x = torch.cat([x, cc1], 1)
         x = nn.functional.relu(self.conv1_2_D_bn(self.conv1_2_D(x)))
