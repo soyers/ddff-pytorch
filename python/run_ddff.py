@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', default=200, type=int, help='number of training epochs (default: 200)')
     parser.add_argument('--checkpoint', default="ddff_cc3_checkpoint.pt", help='Checkpoint file to be created during training (default: ddff_cc3_checkpoint.pt)')
     parser.add_argument('--checkpoint_frequency', default=5, type=int, help='Checkpoint frequency to save intermediate models. (default: 5)')
+    parser.add_argument('--workers', default=0, type=int, help='Number of threads reading the dataset. (default: 0)')
     parser.add_argument('--batchsize', default=2, type=int, help='batch size during training (default: 2)')
     parser.add_argument('--pretrained', default="bn", help='Either specify a npy file to load tensorflow weights or use "bn" or "no_bn" to use pretrained weights from torchvision package (default: bn)')
 
@@ -36,4 +37,5 @@ if __name__ == "__main__":
                     checkpoint_file=args.checkpoint,
                     checkpoint_frequency=args.checkpoint_frequency,
                     batch_size=args.batchsize,
+                    num_workers=args.workers,
                     deterministic=True)
