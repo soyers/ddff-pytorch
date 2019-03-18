@@ -1,5 +1,6 @@
 #! /usr/bin/python3
 
+import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -87,6 +88,14 @@ class DDFFTrainer(BaseTrainer):
 
         #Save instances
         instance.dataloader_validation = dataloader_validation
+
+        #Load checkpoint if ther already exists a file
+        if os.path.isfile(checkpoint_file):
+            start_epoch = instance.load_checkpoint(checkpoint_file)
+            if start_epoch is None:
+                start_epoch = 0
+        else:
+            start_epoch = 0
 
         #Fit instance
         epoch_losses = instance.train(dataloader_train, epochs, checkpoint_file=checkpoint_file, checkpoint_frequency=checkpoint_frequency, max_gradient=max_gradient)
